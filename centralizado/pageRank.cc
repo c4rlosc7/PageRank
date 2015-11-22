@@ -1,7 +1,5 @@
 #include <iostream>
-#include <stdio.h>      /* printf */
-#include <stdlib.h>     /* abs */
-#include <cmath>        // std::abs
+#include <cmath>        // abs
 #include <string>
 #include <cassert>
 #include <zmqpp/zmqpp.hpp>
@@ -81,16 +79,16 @@ int main(){
   Graph graph = g.first; 
   NodeSet nodes = g.second;  
   fixgraph(graph,nodes);
-  int size_graph = graph.size();
-  int size_nodes = nodes.size();  
+  int size_g = graph.size();
+  int size_n = nodes.size();  
   pair<AdjMat,Norm> m = toMatrix(g.first,g.second);
   
   double Lp[graph.size()];
-  double prInitial[graph.size()];
+  double prInitial[size_g];
   //printf("%f\n", d);
   int lpSuma=0;
 /*______________________________________________________________________________________*/    
-  for(int i=0; i<graph.size(); i++){
+  for(int i=0; i<size_g; i++){
   	if(i== 0){ 
   		prInitial[i]=1; 
   	}else{ 
@@ -99,43 +97,32 @@ int main(){
   }
 /*______________________________________________________________________________________*/  
  
-  for(int i=0; i<graph.size(); i++){
-  	for (int j=0; j<nodes.size(); j++){
+  for(int i=0; i<size_g; i++){
+  	for (int j=0; j<size_n; j++){
   		 lpSuma = lpSuma + m.first[i][j];
-  		 //cout << m.first[i][j];
   	}
-  	cout <<"\n";
   	Lp[i] = lpSuma;	
   	lpSuma = 0;
   }
-/*
-  for(int x=0; x<graph.size(); x++){
-  	cout <<"Lp[" <<x<<"] " << Lp[x] <<endl;
-  }
-
-  for(int x=0; x<graph.size(); x++){
-  	cout <<"prInitial[" <<x<<"] " << prInitial[x] <<endl;
-  }  
-*/
 
 /*______________________________________________________________________________________*/  
 
 double suma_interna=0.0;
-double PrNew[graph.size()];
+double PrNew[size_g];
 double d = 0.05;  
 int ite=1;
 double delta = 0.0001;
-double converged; 
+double converged = 0.0;
 
 	do{
 
 	  cout << "--------Iteracion # " << ite <<endl;	
+	  converged = 0.0;
 
-	  for(int j=0; j<graph.size(); j++){
-	  	for (int i=0; i<nodes.size(); i++){  		
+	  for(int j=0; j<size_g; j++){
+	  	for (int i=0; i<size_n; i++){  		
 	  		suma_interna = suma_interna + ((prInitial[i] / Lp[i]) * m.first[i][j]);  		  		
 	  	}  		 	  	
-	  	//cout <<"suma [" << j+1 << "]: "<< suma_interna <<endl;
 	  	d = d + 0.85 * suma_interna;  	
 	  	cout <<"nuevo pr[" << j+1 << "]: "<< d <<endl;
 	  	PrNew[j] = d;	  	
@@ -143,15 +130,13 @@ double converged;
 	  	d = 0.05;
 	  } 	  	  
 
-	  for(int x=0; x<graph.size(); x++){
-  		//cout <<"pr_inicial[" <<x<<"] " << prInitial[x] <<endl;
+	  for(int x=0; x<size_g; x++){
   		converged = (abs(PrNew[x] - prInitial[x])) + converged;
   	  }
 	  
 	  cout << "converged " << converged <<endl;
 
-	  for(int x=0; x<graph.size(); x++){
-  		//cout <<"pr_nuevo[" <<x<<"] " << PrNew[x] <<endl;
+	  for(int x=0; x<size_g; x++){
   		prInitial[x] = PrNew[x];
   	  }	  
 
