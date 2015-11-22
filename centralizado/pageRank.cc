@@ -74,8 +74,9 @@ void fixgraph (Graph& g, NodeSet nodes){
 }
 
 
-int main(){
-  pair<Graph,NodeSet> g = readGraph("example.txt");
+int main(int argc, char **argv) {
+  string filename = argv[1];
+  pair<Graph,NodeSet> g = readGraph(filename);
   Graph graph = g.first; 
   NodeSet nodes = g.second;  
   fixgraph(graph,nodes);
@@ -85,7 +86,6 @@ int main(){
   
   double Lp[graph.size()];
   double prInitial[size_g];
-  //printf("%f\n", d);
   int lpSuma=0;
 /*______________________________________________________________________________________*/    
   for(int i=0; i<size_g; i++){
@@ -100,9 +100,15 @@ int main(){
   for(int i=0; i<size_g; i++){
   	for (int j=0; j<size_n; j++){
   		 lpSuma = lpSuma + m.first[i][j];
+  		 //cout << m.first[i][j];
   	}
-  	Lp[i] = lpSuma;	
-  	lpSuma = 0;
+  	//cout <<"\n";
+  	if(lpSuma == 0){ 
+  		Lp[i] = 1; 
+  	}else{
+  		Lp[i] = lpSuma;	
+  		lpSuma = 0;
+  	}
   }
 
 /*______________________________________________________________________________________*/  
@@ -110,7 +116,7 @@ int main(){
 double suma_interna=0.0;
 double PrNew[size_g];
 double d = 0.05;  
-int ite=1;
+int ite = 1;
 double delta = 0.0001;
 double converged = 0.0;
 
@@ -121,10 +127,10 @@ double converged = 0.0;
 
 	  for(int j=0; j<size_g; j++){
 	  	for (int i=0; i<size_n; i++){  		
-	  		suma_interna = suma_interna + ((prInitial[i] / Lp[i]) * m.first[i][j]);  		  		
+	  		suma_interna = suma_interna + ( (prInitial[i] / Lp[i]) * m.first[i][j] );  		  		
 	  	}  		 	  	
 	  	d = d + 0.85 * suma_interna;  	
-	  	cout <<"nuevo pr[" << j+1 << "]: "<< d <<endl;
+	  	//cout <<"nuevo pr[" << j+1 << "]: "<< d <<endl;
 	  	PrNew[j] = d;	  	
 	  	suma_interna = 0.0;
 	  	d = 0.05;
