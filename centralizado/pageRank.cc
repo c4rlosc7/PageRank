@@ -1,4 +1,7 @@
 #include <iostream>
+#include <stdio.h>      /* printf */
+#include <stdlib.h>     /* abs */
+#include <cmath>        // std::abs
 #include <string>
 #include <cassert>
 #include <zmqpp/zmqpp.hpp>
@@ -26,13 +29,14 @@ pair<Graph,NodeSet> readGraph(const string& filename) {
 	    int source;
 	    int target;
 	    ss >> source;
-	    ss >> target;
+	    ss >> target;	    
+	    //cout << "Stay Here " << source << " " << target <<endl;
 	    result[source].push_back(target);
 	    nodes.insert(source);
 	    nodes.insert(target);
 	    edges++;
 	}
-	cout << "Edges: " << edges << endl;
+	//cout << "Edges: " << edges << endl;
 	return {result,nodes};
 }
 
@@ -63,71 +67,96 @@ void fixgraph (Graph& g, NodeSet nodes){
 		if (g.count(n)==0)
 		{
 			vector <int>adj;
-			for(int k:nodes) 
-				if (k!=n)
+			for(int k: nodes) 
+				if (k != n)
 					adj.push_back(k);
 			g[n]=adj;
 		}
 	}
 }
 
+
 int main(){
   pair<Graph,NodeSet> g = readGraph("example.txt");
   Graph graph = g.first; 
   NodeSet nodes = g.second;  
-  cout << "nodos relacionados " << graph.size() << endl;
-  cout << "numero de nodos " << nodes.size() << endl;
   fixgraph(graph,nodes);
-  //cout << graph.size() << endl;
-  //cout << nodes.size() << endl;
-  
+  int size_graph = graph.size();
+  int size_nodes = nodes.size();  
   pair<AdjMat,Norm> m = toMatrix(g.first,g.second);
-  int sum=0, ii=0;
+  
   double Lp[graph.size()];
-  double PrNew[graph.size()];
-  double d = 0.05;
-  double prI[graph.size()];
-  printf("%f\n", d);
+  double prInitial[graph.size()];
+  //printf("%f\n", d);
+  int lpSuma=0;
 /*______________________________________________________________________________________*/    
   for(int i=0; i<graph.size(); i++){
-  	if(i== 2){ prI[i]=1; }else{ prI[i]=0; }
+  	if(i== 0){ 
+  		prInitial[i]=1; 
+  	}else{ 
+  		prInitial[i]=0; 
+  	}
   }
 /*______________________________________________________________________________________*/  
+ 
   for(int i=0; i<graph.size(); i++){
   	for (int j=0; j<nodes.size(); j++){
-  		 sum = sum + m.first[i][j];
-  		 cout << m.first[i][j];
+  		 lpSuma = lpSuma + m.first[i][j];
+  		 //cout << m.first[i][j];
   	}
   	cout <<"\n";
-  	Lp[ii] = sum;	
-  	sum=0;
-  	ii++;
+  	Lp[i] = lpSuma;	
+  	lpSuma = 0;
+  }
+/*
+  for(int x=0; x<graph.size(); x++){
+  	cout <<"Lp[" <<x<<"] " << Lp[x] <<endl;
   }
 
   for(int x=0; x<graph.size(); x++){
-  	cout << Lp[x] <<endl;
-  }
+  	cout <<"prInitial[" <<x<<"] " << prInitial[x] <<endl;
+  }  
+*/
+
 /*______________________________________________________________________________________*/  
-double aux;
-int ite=0;
 
-do{
+double suma_interna=0.0;
+double PrNew[graph.size()];
+double d = 0.05;  
+int ite=1;
+double delta = 0.0001;
+double converged; 
 
-  for(int j=0; j<graph.size(); j++){
-  	for (int i=0; i<nodes.size(); i++){
-  		aux = (prI[i] / Lp[i]) * m.first[i][j];  	
-  		//printf("aux %f\n", aux);  		
-  	}  		 
-  	d = d + 0.85 * aux;
-  	PrNew[j]=d;
-  	d = 0.05;
-  	cout << PrNew[j] << endl;
-  	//prI[j] = PrNew[j];
-  	aux = 0.0;
-  }
-  for (int j = 0; j < 3; j++) { prI[j] = PrNew[j]; }  
-  ite++;
-}while(ite < 2);
+	do{
+
+	  cout << "--------Iteracion # " << ite <<endl;	
+
+	  for(int j=0; j<graph.size(); j++){
+	  	for (int i=0; i<nodes.size(); i++){  		
+	  		suma_interna = suma_interna + ((prInitial[i] / Lp[i]) * m.first[i][j]);  		  		
+	  	}  		 	  	
+	  	//cout <<"suma [" << j+1 << "]: "<< suma_interna <<endl;
+	  	d = d + 0.85 * suma_interna;  	
+	  	cout <<"nuevo pr[" << j+1 << "]: "<< d <<endl;
+	  	PrNew[j] = d;	  	
+	  	suma_interna = 0.0;
+	  	d = 0.05;
+	  } 	  	  
+
+	  for(int x=0; x<graph.size(); x++){
+  		//cout <<"pr_inicial[" <<x<<"] " << prInitial[x] <<endl;
+  		converged = (abs(PrNew[x] - prInitial[x])) + converged;
+  	  }
+	  
+	  cout << "converged " << converged <<endl;
+
+	  for(int x=0; x<graph.size(); x++){
+  		//cout <<"pr_nuevo[" <<x<<"] " << PrNew[x] <<endl;
+  		prInitial[x] = PrNew[x];
+  	  }	  
+
+	  ite++;
+	}while(delta < converged);
 
   return 0;
 }
