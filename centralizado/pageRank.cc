@@ -73,7 +73,7 @@ void fixgraph (Graph& g, NodeSet nodes){
 	}
 }
 /*_____________________________pagerank initial_________________________________________*/ 
-vector<double> loadLong(int size_g){
+vector<double> PR(int size_g){
 
   vector<double> prInitial(size_g);
   for(int i=0; i<size_g; i++){
@@ -101,7 +101,7 @@ int main(int argc, char **argv) {
   
   double Lp[size_g];
   vector<double>  prInitial(size_g);
-  prInitial = loadLong(size_g);
+  prInitial = PR(size_g);
   int lpSuma=0;
 /*______________________________L(p)____________________________________________________*/  
  
