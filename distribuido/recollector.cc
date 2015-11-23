@@ -14,10 +14,13 @@ int main()
 {
   cout << "Running recollector ";
   context ctx;
-  socket wr(ctx, socket_type::xrep);         // socket workers-recollector
-  wr.bind("tcp://*:6667");
+  socket wr(ctx, socket_type::xrep);         // socket client-recollector
+  wr.bind("tcp://*:6666");
 
-  string idc, idw, ipc, msg_receive;        // id
+  socket rc(ctx, socket_type::xreq);         // socket recollector to client
+  rc.connect("tcp://"+ipc+":6667");
+
+  string idc, msg_receive;                  // id, message
 	while(true)
 	{
 			message wrecollector;
@@ -27,13 +30,8 @@ int main()
 				cout << wrecollector.get(i) << endl;
 			}
 			wrecollector >> idw >> idc;
-			//cout <<"idworkers "<<idw<<" idcliente "<<idc<<endl;
-			wrecollector >> msg_receive >> ipc;
-			//cout <<" message " << msg_receive <<" ipcliente "<<ipc<<endl;
-      
-      socket rc(ctx, socket_type::xreq);         // socket recollector to client
-      rc.connect("tcp://"+ipc+":6666");
-
+			wrecollector >> msg_receive >> ipc;      
+/*______________________________________________________________________________________*/  
       message rclient;
       rclient << idc;
       rclient << msg_receive;

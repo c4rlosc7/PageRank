@@ -97,6 +97,8 @@ int main(int argc, char **argv) {
   fixgraph(graph,nodes);
   int size_g = graph.size();
   int size_n = nodes.size();  
+  double N = size_g; 
+  cout << "N = " << N <<endl; 
   pair<AdjMat,Norm> m = toMatrix(g.first,g.second);
   
   double Lp[size_g];
@@ -108,9 +110,7 @@ int main(int argc, char **argv) {
   for(int i=0; i<size_g; i++){
   	for (int j=0; j<size_n; j++){
   		 lpSuma = lpSuma + m.first[i][j];
-  		 //cout << m.first[i][j];
   	}
-  	//cout <<"\n";
   	if(lpSuma == 0){ 
   		Lp[i] = 1; 
   	}else{
@@ -123,14 +123,15 @@ int main(int argc, char **argv) {
 
 double suma_interna=0.0;
 double PrNew[size_g];
-double d = 0.05;  
+double d = (1.0 - 0.85) / N;  
+cout << "d = " << d << endl;
 int ite = 1;
 double delta = 0.0001;
 double converged = 0.0;
 
 	do{
 
-	  cout << "--------Iteracion # " << ite <<endl;	
+	  cout << " Iteration # " << ite;	
 	  converged = 0.0;
 
 	  for(int j=0; j<size_g; j++){
@@ -148,7 +149,7 @@ double converged = 0.0;
   		converged = (abs(PrNew[x] - prInitial[x])) + converged;
   	  }
 	  
-	  cout << "converged " << converged <<endl;
+	  cout << " converged " << converged <<endl;
 
 	  for(int x=0; x<size_g; x++){
   		prInitial[x] = PrNew[x];
@@ -157,5 +158,13 @@ double converged = 0.0;
 	  ite++;
 	}while(delta < converged);
 
+	double suma_total;
+	cout <<"\n";
+	for(int x=0; x<size_g; x++){
+  		cout << "PR[" << x << "] " << prInitial[x] <<endl;
+  		suma_total = suma_total + prInitial[x];
+  	}	  
+
+  	cout << "Total : " << suma_total <<endl;
   return 0;
 }
