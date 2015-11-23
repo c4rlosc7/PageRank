@@ -72,22 +72,10 @@ void fixgraph (Graph& g, NodeSet nodes){
 		}
 	}
 }
+/*_____________________________pagerank initial_________________________________________*/ 
+vector<double> loadLong(int size_g){
 
-
-int main(int argc, char **argv) {
-  string filename = argv[1];
-  pair<Graph,NodeSet> g = readGraph(filename);
-  Graph graph = g.first; 
-  NodeSet nodes = g.second;  
-  fixgraph(graph,nodes);
-  int size_g = graph.size();
-  int size_n = nodes.size();  
-  pair<AdjMat,Norm> m = toMatrix(g.first,g.second);
-  
-  double Lp[graph.size()];
-  double prInitial[size_g];
-  int lpSuma=0;
-/*______________________________________________________________________________________*/    
+  vector<double> prInitial(size_g);
   for(int i=0; i<size_g; i++){
   	if(i== 0){ 
   		prInitial[i]=1; 
@@ -95,7 +83,27 @@ int main(int argc, char **argv) {
   		prInitial[i]=0; 
   	}
   }
-/*______________________________________________________________________________________*/  
+  return prInitial;	
+}
+/*_____________________________________________________________________________________*/ 
+int main(int argc, char **argv) {
+  
+  string filename = argv[1];
+  pair<Graph,NodeSet> g = readGraph(filename);
+
+  Graph graph = g.first; 
+  NodeSet nodes = g.second;  
+
+  fixgraph(graph,nodes);
+  int size_g = graph.size();
+  int size_n = nodes.size();  
+  pair<AdjMat,Norm> m = toMatrix(g.first,g.second);
+  
+  double Lp[size_g];
+  vector<double>  prInitial(size_g);
+  prInitial = loadLong(size_g);
+  int lpSuma=0;
+/*______________________________L(p)____________________________________________________*/  
  
   for(int i=0; i<size_g; i++){
   	for (int j=0; j<size_n; j++){
