@@ -24,14 +24,15 @@ int main(int argc, char **argv)         // 10.253.96.236 U, 192.168.1.12 CASA
   rc.connect("tcp://"+ip+":6667");
 
   string idc;
-  double suma_interna[3];                  // id, message
   double d = 0.85;
   double N; 
-  int size_g;
+  int size_g=0;
+  double suma_interna[size_g];
+  //vector<double> suma_interna(size_g);
   int ite=1;
 /*______________________________________________________________________________________*/    
 	while(true)
-	{
+	{      
 			message crecollector;
 			wr.receive(crecollector);
 
