@@ -4,6 +4,7 @@
 #include <cassert>
 #include <fstream>
 #include <zmqpp/zmqpp.hpp>
+#include <map>
 #include <cmath>        // abs
 #include <fstream>
 #include <unordered_map>

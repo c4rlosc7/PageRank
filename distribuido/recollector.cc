@@ -3,6 +3,7 @@
 #include <fstream>  
 #include <string>
 #include <list>
+#include <map>
 #include <cassert>
 #include <map>
 #include <zmqpp/zmqpp.hpp>
@@ -27,8 +28,7 @@ int main(int argc, char **argv)         // 10.253.96.236 U, 192.168.1.12 CASA
   double d = 0.85;
   double N; 
   int size_g=0;
-  double suma_interna[size_g];
-  //vector<double> suma_interna(size_g);
+  map<int,double> suma_interna;
   int ite=1;
 /*______________________________________________________________________________________*/    
 	while(true)
@@ -44,7 +44,7 @@ int main(int argc, char **argv)         // 10.253.96.236 U, 192.168.1.12 CASA
         crecollector >> suma_interna[i];        
       }			
       cout << "ite " << ite <<endl;
-      double PrNew[size_g];      
+      map<int,double> PrNew;      
 
       for(int p=0; p<size_g; p++){
         PrNew[p] = ((1 - d) / N) + (d * suma_interna[p]);        
