@@ -102,40 +102,78 @@ int main(int argc, char **argv){                     // .client 192.168.1.12 fil
 
   fixgraph(graph,nodes);
   int size_g = graph.size();
-  //int size_n = nodes.size();  
+  int size_n = nodes.size();  
   double N = size_g; 
   cout << "N = " << N <<endl; 
   pair<AdjMat,Norm> m = toMatrix(g.first,g.second);
   
-  //double Lp[size_g];
+  double Lp[size_g];
   vector<double>  prInitial(size_g);
+
   prInitial = PR(size_g);
-  //int lpSuma=0;
-/*___________________________________________________________________________*/
+  double aux_prInitial[size_g];
+  int lpSuma=0;
+/*______________________________L(p)____________________________________________________*/  
+ 
+  for(int i=0; i<size_g; i++){
+  	for (int j=0; j<size_n; j++){
+  		 lpSuma = lpSuma + m.first[i][j];
+  	}
+  	if(lpSuma == 0){ 
+  		Lp[i] = 1; 
+  	}else{
+  		Lp[i] = lpSuma;	
+  		lpSuma = 0;
+  	}
+  }
+
+/*______________________________________________________________________________________*/    
+/*______________________________________________________________________________________*/  
+
+double suma_interna=0.0;
+double converged = 0.0;
+double delta = 0.0001;
+int ite = 1;
+/*_______________________________________________________________________________*/  	  
   context ctx;
   socket wx(ctx, socket_type::xreq);  // socket (wx) cliente - recollector (6666)
   wx.connect("tcp://"+ip+":6666");
 
   socket rc(ctx, socket_type::xrep); // socket recollector to client
   rc.bind("tcp://*:6667");
-
-  message cworkers;                 // mensaje cworkers
-
+/*_________________________________________________________________________*/
+  	message cworkers;                 // mensaje cworkers
+  	cworkers << N;
+	cworkers << size_g;
 	string msg;
-	while(true)
-	{		
-		cout << "Enter filename : ";
-		cin >> msg;
-		cworkers << msg;
+	do{		
+		suma_interna = 0.0;
+		for(int j=0; j<size_g; j++){
+			for (int i=0; i<size_n; i++){  		
+		  		suma_interna = suma_interna + ( (prInitial[i] / Lp[i]) * m.first[i][j] );  		  		
+		  	}  		 	  	
+		  	cout << suma_interna <<endl; 
+		  	cworkers << suma_interna;
+		} 	 		
 		wx.send(cworkers);		
 /*_________________________________________________________________________*/
 		message rclient;
 		rc.receive(rclient);
 		string idr, idc;
 		rclient >> idr >> idc;
-		string msg_receive;
-		rclient >> msg_receive;
-		cout << "Message: " << msg_receive <<endl;
-	}
+	      
+	    for (int i=0; i< 3; i++){
+	       rclient >> aux_prInitial[i];
+	    }			
+	    for (int i=0; i< 3; i++){
+	       converged = (abs(aux_prInitial[i] - prInitial[i])) + converged;
+	    }  
+	    for (int i=0; i< 3; i++){
+	       prInitial[i] = aux_prInitial[i];
+	    }	
+	    cout << " Iteration # " << ite << " converged " << converged <<endl;
+	    ite++;
+	}while(delta < converged);
+
   return 0;
 }
