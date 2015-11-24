@@ -1,3 +1,4 @@
+//Carlos Andres Martinez - {Client - recollector } ./pagerank FILENAME 
 #include <iostream>
 #include <cmath>        // abs
 #include <string>
@@ -6,6 +7,7 @@
 #include <fstream>
 #include <unordered_map>
 #include <sstream>
+#include <time.h>
 
 using namespace std;
 using namespace zmqpp;
@@ -14,7 +16,7 @@ using Graph = unordered_map<int,vector<int>>;
 using NodeSet = unordered_set<int>; 
 using AdjMat = vector<vector<int>>;
 using Norm = unordered_map<int,int>;
-
+/*______________________________________________________________________________________*/  
 pair<Graph,NodeSet> readGraph(const string& filename) {
 	Graph result;
 	NodeSet nodes;
@@ -37,7 +39,7 @@ pair<Graph,NodeSet> readGraph(const string& filename) {
 	//cout << "Edges: " << edges << endl;
 	return {result,nodes};
 }
-
+/*______________________________________________________________________________________*/  
 pair<AdjMat,Norm> toMatrix(const Graph& g, const NodeSet& nodes) { // pair
 	Norm norm;
 	int i = 0;
@@ -58,7 +60,7 @@ pair<AdjMat,Norm> toMatrix(const Graph& g, const NodeSet& nodes) { // pair
 	}
 	return {mat,norm};
 }
-
+/*______________________________________________________________________________________*/  
 void fixgraph (Graph& g, NodeSet nodes){
 	for (int n: nodes)
 	{
@@ -84,10 +86,12 @@ vector<double> PR(int size_g){
   	}
   }
   return prInitial;	
-}
+} 
+    
 /*_____________________________________________________________________________________*/ 
 int main(int argc, char **argv) {
-  
+	
+  clock_t start = clock();	
   string filename = argv[1];
   pair<Graph,NodeSet> g = readGraph(filename);
 
@@ -98,7 +102,6 @@ int main(int argc, char **argv) {
   int size_g = graph.size();
   int size_n = nodes.size();  
   double N = size_g; 
-  cout << "N = " << N <<endl; 
   pair<AdjMat,Norm> m = toMatrix(g.first,g.second);
   
   double Lp[size_g];
@@ -124,7 +127,6 @@ int main(int argc, char **argv) {
 double suma_interna=0.0;
 double PrNew[size_g];
 double d = (1.0 - 0.85) / N;  
-cout << "d = " << d << endl;
 int ite = 1;
 double delta = 0.0001;
 double converged = 0.0;
@@ -164,7 +166,11 @@ double converged = 0.0;
   		cout << "PR[" << x << "] " << prInitial[x] <<endl;
   		suma_total = suma_total + prInitial[x];
   	}	  
-
   	cout << "Total : " << suma_total <<endl;
+ 
+	clock_t end = clock();
+	double time = (double) (end-start) / CLOCKS_PER_SEC * 1000.0;
+
+    cout <<"Time Execute: " << time << endl;
   return 0;
 }

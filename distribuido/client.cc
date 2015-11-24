@@ -1,4 +1,4 @@
-//Carlos Andres Martinez - {Client - workers - recollector }
+//Carlos Andres Martinez - {Client - recollector } ./client IP FILENAME
 #include <iostream>
 #include <string>
 #include <cassert>
@@ -7,6 +7,7 @@
 #include <cmath>        // abs
 #include <fstream>
 #include <unordered_map>
+#include <time.h>
 #include <sstream>
 
 using namespace std;
@@ -91,6 +92,8 @@ vector<double> PR(int size_g){
 /*____________________________________________________________________________*/
 
 int main(int argc, char **argv){                     // .client 192.168.1.12 filename
+
+  clock_t start = clock();	
   string ip, filename; 		// 10.253.96.236 U, 192.168.1.12 CASA
   ip = argv[1];
   filename = argv[2];
@@ -104,7 +107,7 @@ int main(int argc, char **argv){                     // .client 192.168.1.12 fil
   int size_g = graph.size();
   int size_n = nodes.size();  
   double N = size_g; 
-  cout << "N = " << N <<endl; 
+
   pair<AdjMat,Norm> m = toMatrix(g.first,g.second);
   
   double Lp[size_g];
@@ -128,8 +131,6 @@ int main(int argc, char **argv){                     // .client 192.168.1.12 fil
   }
 
 /*______________________________________________________________________________________*/    
-/*______________________________________________________________________________________*/  
-
 double suma_interna=0.0;
 double converged = 0.0;
 double delta = 0.0001;
@@ -143,17 +144,20 @@ int ite = 1;
   rc.bind("tcp://*:6667");
 /*_________________________________________________________________________*/
   	message cworkers;                 // mensaje cworkers
-  	cworkers << N;
-	cworkers << size_g;
 	string msg;
-	do{		
-		suma_interna = 0.0;
+	do{				
+		converged = 0.0;
+
+  		cworkers << N;
+		cworkers << size_g;
+
 		for(int j=0; j<size_g; j++){
 			for (int i=0; i<size_n; i++){  		
 		  		suma_interna = suma_interna + ( (prInitial[i] / Lp[i]) * m.first[i][j] );  		  		
 		  	}  		 	  	
-		  	cout << suma_interna <<endl; 
+		  	//cout << suma_interna <<endl; 
 		  	cworkers << suma_interna;
+		  	suma_interna = 0.0;
 		} 	 		
 		wx.send(cworkers);		
 /*_________________________________________________________________________*/
@@ -162,18 +166,32 @@ int ite = 1;
 		string idr, idc;
 		rclient >> idr >> idc;
 	      
-	    for (int i=0; i< 3; i++){
+	    for (int i=0; i< size_g; i++){
 	       rclient >> aux_prInitial[i];
 	    }			
-	    for (int i=0; i< 3; i++){
+	    for (int i=0; i< size_g; i++){
 	       converged = (abs(aux_prInitial[i] - prInitial[i])) + converged;
 	    }  
-	    for (int i=0; i< 3; i++){
+	    for (int i=0; i< size_g; i++){
 	       prInitial[i] = aux_prInitial[i];
 	    }	
+
 	    cout << " Iteration # " << ite << " converged " << converged <<endl;
 	    ite++;
+
 	}while(delta < converged);
+
+	double suma_total;
+	cout <<"\n";
+	for(int x=0; x<size_g; x++){
+  		cout << "PR[" << x << "] " << prInitial[x] <<endl;
+  		suma_total = suma_total + prInitial[x];
+  	}	  
+  	cout << "Suma " << suma_total <<endl;
+
+	clock_t end = clock();
+	double time = (double) (end-start) / CLOCKS_PER_SEC * 1000.0;
+    cout <<"Time Execution: " << time << endl;  	
 
   return 0;
 }
